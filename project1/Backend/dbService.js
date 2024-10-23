@@ -87,6 +87,83 @@ class DbService{
    to work with the asynchronous nature of the connection.query method, allowing 
    the function to pause until the query is completed.
    */
+
+   async registerUser(username, firstName, lastName, age, salary, password) {
+      try {
+         const dateRegistered = new Date();
+         const response = await new Promise((resolve, reject) => {
+            const query = `
+                  INSERT INTO users (username, first_name, last_name, age, salary, password, date_registered)
+                  VALUES (?, ?, ?, ?, ?, ?, ?);
+            `;
+            connection.query(query, [username, firstName, lastName, age, salary, password, dateRegistered], (err, result) => {
+                  if (err) reject(new Error(err.message));
+                  else resolve(result.insertId);
+            });
+         });
+
+         console.log("New user registered with ID: ", response);
+         return response;
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
+
+
+   async authenticateUser(username, password) {
+      try {
+         const response = await new Promise((resolve, reject) => {
+            const query = "SELECT * FROM users WHERE username = ? AND password = ?;";
+            connection.query(query, [username, password], (err, results) => {
+                  if (err) reject(new Error(err.message));
+                  else resolve(results.length > 0);
+            });
+         });
+
+         return response; // returns true if user exists, false otherwise
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
+
+   async updateSigninTime(username) {
+      try {
+         const response = await new Promise((resolve, reject) => {
+            const query = "UPDATE users SET signintime = ? WHERE username = ?";
+            const currentTime = new Date();
+            connection.query(query, [currentTime, username], (err, result) => {
+                  if (err) reject(new Error(err.message));
+                  else resolve(result.affectedRows);
+            });
+         });
+
+         return response === 1 ? true : false;
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
+
+
+   async getUsersNeverLoggedIn() {
+      try {
+         const response = await new Promise((resolve, reject) => {
+            const query = "SELECT * FROM users WHERE signintime IS NULL";
+            connection.query(query, (err, results) => {
+                  if (err) reject(new Error(err.message));
+                  else resolve(results);
+            });
+         });
+
+         return response;
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
+
     async getAllData(){
         try{
            // use await to call an asynchronous function
