@@ -289,4 +289,4 @@ function loadHTMLTable(data){
     });
 
     table.innerHTML = tableHtml;
-}
+};

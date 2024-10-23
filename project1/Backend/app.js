@@ -15,6 +15,59 @@ app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({extended: false}));
 
+
+// Register service
+// Register service
+app.post('/register', (request, response) => {
+    console.log("app: register a new user.");
+
+    const { username, firstName, lastName, age, salary, password } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.registerUser(username, firstName, lastName, age, salary, password);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to register user" });
+        });
+});
+
+
+// Login service
+app.post('/login', (request, response) => {
+    console.log("app: user login attempt.");
+
+    const { username, password } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.authenticateUser(username, password);
+
+    result
+        .then(data => {
+            if (data) {
+                // If the login is successful, update the signintime
+                db.updateSigninTime(username)
+                    .then(() => {
+                        response.json({ success: true });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        response.status(500).json({ success: false, message: "Failed to update sign-in time" });
+                    });
+            } else {
+                response.json({ success: false, message: "Invalid credentials" });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Error during login" });
+        });
+});
+
+
+
 // create
 app.post('/insert', (request, response) => {
     console.log("app: insert a row.");
@@ -36,6 +89,23 @@ app.post('/insert', (request, response) => {
 
 
 // read 
+
+// Get users who have never logged in
+app.get('/users/neverloggedin', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getUsersNeverLoggedIn();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch users" });
+        });
+});
+
+
+
 app.get('/getAll', (request, response) => {
     
     const db = dbService.getDbServiceInstance();
