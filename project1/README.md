@@ -23,7 +23,8 @@ Consider to create the user table using the following CREATE TABLE stmt (feel fr
 
 ```SQL
 CREATE TABLE Users(
-   userid VARCHAR(50) primary key,
+   username VARCHAR(50) primary key,
+   password VARCHAR(50), // maybe encrypted or a hash?
    firstname VARCHAR(50),
    lastname VARCHAR(50),
    salary FLOAT,
@@ -38,19 +39,19 @@ Note: the grading will be based on the correct result of the query, the design o
 doenv is a file that you need to customize and rename it to .env to work.
 
 **How to run the sample code**
-1. We will use the Apache web server. Create the first webpage index.html under ```C:\xampp\htdocs>``` (or similar directory where you installed XAMPP) and point your browser to ```http://localhost/index.html```. You should see your first webpage.
+1. We will use the Apache web server. Create the first webpage index.html under ```C:\xampp\htdocs>``` (or similar directory where you installed XAMPP) and point your browser to [http://localhost/index.html](http://localhost/index.html). You should see your first webpage. The purpose of this step is to confirm that the Web server is running, and understand the ROOT URL points to the path location: C:\xampp\htdocs or similar directory in your file system. 
 2. At ```C:\xampp\htdocs```, run ```git clone https://github.com/shiyonglu/database_javascript.git``` to copy the whole sample code to the current directory.
 3. Now you can access the Frontend via [http://localhost/database_javascript/project1/Frontend/index.html](http://localhost/database_javascript/project1/Frontend/index.html).
-4. Configure the MySql database according to ```C:\xampp\htdocs\database_javascript\project1\Backend\dotenv```, that is, to create a database called ```web_app``` and a user ```john``` with password ```1234``` via the Admin interface ```http://localhost/phpmyadmin/```. The user ```john``` will be granted with all priviledges for the ```web_app``` database. To get started, you might also change the file as follows to only use the root user:
+4. You can configure parameters directly in dbServices.js and app.js. Here, we achieve this by configuring parameters using the .env file. Configure the MySql database according to ```C:\xampp\htdocs\database_javascript\project1\Backend\dotenv```, that is, to create a database called ```web_app``` and a user ```john``` with password ```1234``` via the Admin interface ```http://localhost/phpmyadmin/```. The user ```john``` will be granted with all priviledges for the ```web_app``` database. To get started, you might also change the dotenv file as follows to only use the root user:
 ```javascript
-PORT=5000
+PORT=5050
 USER=root
 PASSWORD=
 DATABASE=web_app
 DB_PORT=3306
 HOST=localhost
 ```
-5. You need to rename dotenv to .env by command ```move dotenv .env```.
+5. You need to rename dotenv to .env by command ```move dotenv .env```. 
 6.  Under the database ```web_app```, create an empty table as follows: 
 ```SQL
 create table names (id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100), date_added DATE);
@@ -62,11 +63,11 @@ create table names (id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100), da
 ```javasript
     "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon app.js"
   },
 ```
 11. Start the Backend by running ```npm start```.
-12. Feel free to access some of the Backend endpoints directly such as [http://localhost:5000/getall](http://localhost:5000/getall). You will only receive JSON data without nice rendering. 
+12. Feel free to access some of the Backend endpoints directly such as [http://localhost:5050/getAll](http://localhost:5050/getAll). You will only receive JSON data without nice rendering. 
 13. Now you can interact with the Frontend [http://localhost/database_javascript/project1/Frontend/index.html](http://localhost/database_javascript/project1/Frontend/index.html).
 
 ---------------------------------------

@@ -65,8 +65,8 @@ Arrow functions have a few notable features:
 
 // fetch call is to call the backend
 document.addEventListener('DOMContentLoaded', function() {
-    // one can point your browser to http://localhost:5000/getAll to check what it returns first.
-    fetch('http://localhost:5000/getAll')     
+    // one can point your browser to http://localhost:5050/getAll to check what it returns first.
+    fetch('http://localhost:5050/getAll')     
     .then(response => response.json())
     .then(data => loadHTMLTable(data['data']));
 });
@@ -79,7 +79,7 @@ addBtn.onclick = function (){
     const name = nameInput.value;
     nameInput.value = "";
 
-    fetch('http://localhost:5000/insert', {
+    fetch('http://localhost:5050/insert', {
         headers: {
             'Content-type': 'application/json'
         },
@@ -97,7 +97,7 @@ searchBtn.onclick = function (){
     const searchValue = searchInput.value;
     searchInput.value = "";
 
-    fetch('http://localhost:5000/search/' + searchValue)
+    fetch('http://localhost:5050/search/' + searchValue)
     .then(response => response.json())
     .then(data => loadHTMLTable(data['data']));
 }
@@ -122,7 +122,7 @@ document.querySelector('table tbody').addEventListener('click',
 
 function deleteRowById(id){
     // debug(id);
-    fetch('http://localhost:5000/delete/' + id,
+    fetch('http://localhost:5050/delete/' + id,
        { 
         method: 'DELETE'
        }
@@ -163,7 +163,7 @@ updateBtn.onclick = function(){
     
     const updatedNameInput = document.querySelector('#update-name-input');
 
-    fetch('http://localhost:5000/update',
+    fetch('http://localhost:5050/update',
           {
             headers: {
                 'Content-type': 'application/json'
@@ -191,7 +191,7 @@ updateBtn.onclick = function(){
 // this function is used for debugging only, and should be deleted afterwards
 function debug(data)
 {
-    fetch('http://localhost:5000/debug', {
+    fetch('http://localhost:5050/debug', {
         headers: {
             'Content-type': 'application/json'
         },
