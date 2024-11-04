@@ -104,6 +104,20 @@ app.get('/users/neverloggedin', (request, response) => {
         });
 });
 
+// Get users registered after John
+app.get('/users/registeredAfterJohn', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getUsersRegisteredAfterJohn();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch users" });
+        });
+});
+
 
 
 app.get('/getAll', (request, response) => {

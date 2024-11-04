@@ -164,6 +164,37 @@ class DbService{
    }
 
 
+   async getUsersRegisteredAfterJohn() {
+      try {
+         const response = await new Promise((resolve, reject) => {
+            // Find the registration date of John
+            const query = "SELECT date_registered FROM users WHERE first_name = 'John' ORDER BY date_registered ASC LIMIT 1";
+            connection.query(query, (err, results) => {
+                  if (err) reject(new Error(err.message));
+                  else {
+                     if (results.length > 0) {
+                        const johnDate = results[0].date_registered;
+                        // Get all users who registered after John
+                        const queryAfterJohn = "SELECT * FROM users WHERE date_registered > ?";
+                        connection.query(queryAfterJohn, [johnDate], (err, results) => {
+                              if (err) reject(new Error(err.message));
+                              else resolve(results);
+                        });
+                     } else {
+                        resolve([]);
+                     }
+                  }
+            });
+         });
+
+         return response;
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
+
+
     async getAllData(){
         try{
            // use await to call an asynchronous function
