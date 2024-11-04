@@ -104,6 +104,47 @@ app.get('/users/neverloggedin', (request, response) => {
         });
 });
 
+// Get users registered after John
+app.get('/users/registeredAfterJohn', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getUsersRegisteredAfterJohn();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch users" });
+        });
+});
+
+// Get users registered on the same day as John
+app.get('/users/registeredSameDayJohn', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getUsersRegisteredSameDayJohn();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch users" });
+        });
+});
+
+// Get users registered today
+app.get('/users/registeredToday', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getUsersRegisteredToday();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch users" });
+        });
+});
 
 
 app.get('/getAll', (request, response) => {
