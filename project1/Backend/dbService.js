@@ -315,6 +315,69 @@ class DbService{
          }
    }
 
+   async searchUsersByName(firstName, lastName) {
+      const connection = this.createConnection();
+      const query = `SELECT * FROM users WHERE 
+                     first_name LIKE ? OR 
+                     last_name LIKE ?`;
+  
+      return new Promise((resolve, reject) => {
+          connection.query(query, [`%${firstName}%`, `%${lastName}%`], (err, results) => {
+              if (err) {
+                  reject(err);
+              } else {
+                  resolve(results);
+              }
+          });
+      });
+  }
+  
+  async searchUserById(userId) {
+   const connection = this.createConnection();
+   const query = `SELECT * FROM users WHERE user_id = ?`;
+
+   return new Promise((resolve, reject) => {
+       connection.query(query, [userId], (err, results) => {
+           if (err) {
+               reject(err);
+           } else {
+               resolve(results);
+           }
+       });
+   });
+}
+
+async searchUsersBySalaryRange(minSalary, maxSalary) {
+   const connection = this.createConnection();
+   const query = `SELECT * FROM users WHERE salary BETWEEN ? AND ?`;
+
+   return new Promise((resolve, reject) => {
+       connection.query(query, [minSalary, maxSalary], (err, results) => {
+           if (err) {
+               reject(err);
+           } else {
+               resolve(results);
+           }
+       });
+   });
+}
+
+async searchUsersByAgeRange(minAge, maxAge) {
+   const connection = this.createConnection();
+   const query = `SELECT * FROM users WHERE age BETWEEN ? AND ?`;
+
+   return new Promise((resolve, reject) => {
+       connection.query(query, [minAge, maxAge], (err, results) => {
+           if (err) {
+               reject(err);
+           } else {
+               resolve(results);
+           }
+       });
+   });
+}
+
+
    async deleteRowById(id){
          try{
               id = parseInt(id, 10);

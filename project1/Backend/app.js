@@ -237,6 +237,66 @@ app.get('/testdb', (request, response) => {
     .catch(err => console.log(err));
 });
 
+// search users by first and/or last name
+app.get('/searchUsers', async (request, response) => {
+    const { firstName, lastName } = request.query;
+    const db = dbService.getDbServiceInstance();
+
+    try {
+        const data = await db.searchUsersByName(firstName, lastName);
+        response.json({ data: data });
+    } catch (err) {
+        console.log(err);
+        response.status(500).json({ success: false, message: "Failed to fetch users" });
+    }
+});
+
+// search users by userid
+
+app.get('/searchUserById/:userId', async (request, response) => {
+    const { userId } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    try {
+        const data = await db.searchUserById(userId);
+        if (data.length === 0) {
+            return response.status(404).json({ success: false, message: "User not found" });
+        }
+        response.json({ data: data[0] }); // assuming ID is unique and only one record should be returned
+    } catch (err) {
+        console.log(err);
+        response.status(500).json({ success: false, message: "Failed to fetch user" });
+    }
+});
+
+// search usrs whose salary is between x and y
+app.get('/searchUsersBySalary', async (request, response) => {
+    const { minSalary, maxSalary } = request.query;
+    const db = dbService.getDbServiceInstance();
+
+    try {
+        const data = await db.searchUsersBySalaryRange(minSalary, maxSalary);
+        response.json({ data: data });
+    } catch (err) {
+        console.log(err);
+        response.status(500).json({ success: false, message: "Failed to fetch users" });
+    }
+});
+
+// seach all users whose age is between x and y
+app.get('/searchUsersByAge', async (request, response) => {
+    const { minAge, maxAge } = request.query;
+    const db = dbService.getDbServiceInstance();
+
+    try {
+        const data = await db.searchUsersByAgeRange(minAge, maxAge);
+        response.json({ data: data });
+    } catch (err) {
+        console.log(err);
+        response.status(500).json({ success: false, message: "Failed to fetch users" });
+    }
+});
+
 
 // set up the web server listener
 // if we use .env to configure

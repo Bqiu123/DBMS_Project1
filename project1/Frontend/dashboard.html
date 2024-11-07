@@ -16,6 +16,28 @@
         <button id="get-never-logged-in-btn">Get Users Who Have Never Logged In</button>
         <div id="never-logged-in-users"></div>
 
+
+        <input type="text" id="firstNameInput" placeholder="First Name">
+        <input type="text" id="lastNameInput" placeholder="Last Name">
+        <button onclick="searchUsers()">Search Users</button>
+        <div id="searchResults"></div>
+
+        <input type="text" id="userIdInput" placeholder="User ID">
+        <button onclick="searchUserById()">Search User by ID</button>
+        <div id="userIdResults"></div>
+
+        <input type="number" id="minSalaryInput" placeholder="Minimum Salary">
+        <input type="number" id="maxSalaryInput" placeholder="Maximum Salary">
+        <button onclick="searchUsersBySalary()">Search Users by Salary</button>
+        <div id="salarySearchResults"></div>
+
+        <input type="number" id="minAgeInput" placeholder="Minimum Age">
+        <input type="number" id="maxAgeInput" placeholder="Maximum Age">
+        <button onclick="searchUsersByAge()">Search Users by Age</button>
+        <div id="ageSearchResults"></div>
+
+
+
         <button id="search-after-john-btn">Search Users Registered After John</button>
         <div id="users-registered-after-john"></div>
 

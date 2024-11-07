@@ -80,6 +80,96 @@ document.querySelector('#search-same-day-john-btn').onclick = function () {
     .catch(err => console.error("Error fetching users registered on the same day as John: ", err));
 };
 
+
+// when searching for users by first and/or last name
+function searchUsers() {
+    const firstName = document.getElementById('firstNameInput').value;
+    const lastName = document.getElementById('lastNameInput').value;
+
+    fetch(`/searchUsers?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = ''; // Clear previous results
+            data.data.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}`;
+                resultsContainer.appendChild(userDiv);
+            });
+        })
+        .catch(err => console.error('Failed to fetch users:', err));
+}
+
+// searching users by user id
+function searchUserById() {
+    const userId = document.getElementById('userIdInput').value;
+
+    fetch(`/searchUserById/${encodeURIComponent(userId)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('User not found');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const resultContainer = document.getElementById('userIdResults');
+            resultContainer.innerHTML = ''; // Clear previous results
+            const userDiv = document.createElement('div');
+            userDiv.textContent = `Name: ${data.data.first_name} ${data.data.last_name}`;
+            resultContainer.appendChild(userDiv);
+        })
+        .catch(err => {
+            console.error('Failed to fetch user:', err);
+            const resultContainer = document.getElementById('userIdResults');
+            resultContainer.innerHTML = 'User not found';
+        });
+}
+
+// search all users whose salary is between x and y
+function searchUsersBySalary() {
+    const minSalary = document.getElementById('minSalaryInput').value;
+    const maxSalary = document.getElementById('maxSalaryInput').value;
+
+    fetch(`/searchUsersBySalary?minSalary=${encodeURIComponent(minSalary)}&maxSalary=${encodeURIComponent(maxSalary)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('salarySearchResults');
+            resultsContainer.innerHTML = ''; // Clear previous results
+            data.data.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}, Salary: ${user.salary}`;
+                resultsContainer.appendChild(userDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Failed to fetch users:', err);
+            resultsContainer.innerHTML = 'Failed to fetch users';
+        });
+}
+
+// search all users whose age is between x and y
+function searchUsersByAge() {
+    const minAge = document.getElementById('minAgeInput').value;
+    const maxAge = document.getElementById('maxAgeInput').value;
+
+    fetch(`/searchUsersByAge?minAge=${encodeURIComponent(minAge)}&maxAge=${encodeURIComponent(maxAge)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('ageSearchResults');
+            resultsContainer.innerHTML = ''; // Clear previous results
+            data.data.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}, Age: ${user.age}`;
+                resultsContainer.appendChild(userDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Failed to fetch users:', err);
+            resultsContainer.innerHTML = 'Failed to fetch users';
+        });
+}
+
+
 // When the "Get Users Registered Today" button is clicked
 document.querySelector('#get-registered-today-btn').onclick = function () {
     fetch('http://localhost:5050/users/registeredToday', {
