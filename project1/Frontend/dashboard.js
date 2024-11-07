@@ -81,93 +81,123 @@ document.querySelector('#search-same-day-john-btn').onclick = function () {
 };
 
 
-// when searching for users by first and/or last name
-function searchUsers() {
-    const firstName = document.getElementById('firstNameInput').value;
-    const lastName = document.getElementById('lastNameInput').value;
+// Search users by first and/or last name
+document.querySelector('#search-users-btn').onclick = function () {
+    const firstName = document.querySelector('#search-first-name').value.trim();
+    const lastName = document.querySelector('#search-last-name').value.trim();
 
-    fetch(`/searchUsers?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`)
-        .then(response => response.json())
-        .then(data => {
-            const resultsContainer = document.getElementById('searchResults');
-            resultsContainer.innerHTML = ''; // Clear previous results
+    fetch(`http://localhost:5050/users/search?firstName=${firstName}&lastName=${lastName}`, {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const usersContainer = document.querySelector('#search-users-result');
+        if (data.data.length === 0) {
+            usersContainer.innerHTML = '<p>No users found.</p>';
+        } else {
+            let usersHtml = '<h3>Search Results:</h3><ul>';
             data.data.forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}`;
-                resultsContainer.appendChild(userDiv);
+                usersHtml += `<li>Username: ${user.username}, Name: ${user.first_name} ${user.last_name}, Registered On: ${new Date(user.date_registered).toLocaleString()}</li>`;
             });
-        })
-        .catch(err => console.error('Failed to fetch users:', err));
-}
+            usersHtml += '</ul>';
+            usersContainer.innerHTML = usersHtml;
+        }
+    })
+    .catch(err => console.error("Error searching users: ", err));
+};
 
-// searching users by user id
-function searchUserById() {
-    const userId = document.getElementById('userIdInput').value;
 
-    fetch(`/searchUserById/${encodeURIComponent(userId)}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('User not found');
-            }
-            return response.json();
-        })
-        .then(data => {
-            const resultContainer = document.getElementById('userIdResults');
-            resultContainer.innerHTML = ''; // Clear previous results
-            const userDiv = document.createElement('div');
-            userDiv.textContent = `Name: ${data.data.first_name} ${data.data.last_name}`;
-            resultContainer.appendChild(userDiv);
-        })
-        .catch(err => {
-            console.error('Failed to fetch user:', err);
-            const resultContainer = document.getElementById('userIdResults');
-            resultContainer.innerHTML = 'User not found';
-        });
-}
+// Search user by ID
+document.querySelector('#search-user-by-id-btn').onclick = function () {
+    const userId = document.querySelector('#search-user-id').value.trim();
 
-// search all users whose salary is between x and y
-function searchUsersBySalary() {
-    const minSalary = document.getElementById('minSalaryInput').value;
-    const maxSalary = document.getElementById('maxSalaryInput').value;
+    if (userId === "") {
+        alert("Please enter a User ID to search.");
+        return;
+    }
 
-    fetch(`/searchUsersBySalary?minSalary=${encodeURIComponent(minSalary)}&maxSalary=${encodeURIComponent(maxSalary)}`)
-        .then(response => response.json())
-        .then(data => {
-            const resultsContainer = document.getElementById('salarySearchResults');
-            resultsContainer.innerHTML = ''; // Clear previous results
+    fetch(`http://localhost:5050/users/searchById?id=${userId}`, {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const userContainer = document.querySelector('#search-user-by-id-result');
+        if (!data.data) {
+            userContainer.innerHTML = '<p>No user found with the given ID.</p>';
+        } else {
+            const user = data.data;
+            userContainer.innerHTML = `
+                <h3>User Found:</h3>
+                <p>Username: ${user.username}</p>
+                <p>Name: ${user.first_name} ${user.last_name}</p>
+                <p>Registered On: ${new Date(user.date_registered).toLocaleString()}</p>
+            `;
+        }
+    })
+    .catch(err => console.error("Error searching user by ID: ", err));
+};
+
+// Search users by salary range
+document.querySelector('#search-users-by-salary-btn').onclick = function () {
+    const minSalary = document.querySelector('#min-salary').value.trim();
+    const maxSalary = document.querySelector('#max-salary').value.trim();
+
+    fetch(`http://localhost:5050/users/searchBySalary?minSalary=${minSalary}&maxSalary=${maxSalary}`, {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const usersContainer = document.querySelector('#search-users-by-salary-result');
+        if (data.data.length === 0) {
+            usersContainer.innerHTML = '<p>No users found with the given salary range.</p>';
+        } else {
+            let usersHtml = '<h3>Search Results by Salary:</h3><ul>';
             data.data.forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}, Salary: ${user.salary}`;
-                resultsContainer.appendChild(userDiv);
+                usersHtml += `<li>Username: ${user.username}, Name: ${user.first_name} ${user.last_name}, Salary: ${user.salary}</li>`;
             });
-        })
-        .catch(err => {
-            console.error('Failed to fetch users:', err);
-            resultsContainer.innerHTML = 'Failed to fetch users';
-        });
-}
+            usersHtml += '</ul>';
+            usersContainer.innerHTML = usersHtml;
+        }
+    })
+    .catch(err => console.error("Error searching users by salary: ", err));
+};
 
-// search all users whose age is between x and y
-function searchUsersByAge() {
-    const minAge = document.getElementById('minAgeInput').value;
-    const maxAge = document.getElementById('maxAgeInput').value;
+// Search users by age range
+document.querySelector('#search-users-by-age-btn').onclick = function () {
+    const minAge = document.querySelector('#min-age').value.trim();
+    const maxAge = document.querySelector('#max-age').value.trim();
 
-    fetch(`/searchUsersByAge?minAge=${encodeURIComponent(minAge)}&maxAge=${encodeURIComponent(maxAge)}`)
-        .then(response => response.json())
-        .then(data => {
-            const resultsContainer = document.getElementById('ageSearchResults');
-            resultsContainer.innerHTML = ''; // Clear previous results
+    fetch(`http://localhost:5050/users/searchByAge?minAge=${minAge}&maxAge=${maxAge}`, {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const usersContainer = document.querySelector('#search-users-by-age-result');
+        if (data.data.length === 0) {
+            usersContainer.innerHTML = '<p>No users found with the given age range.</p>';
+        } else {
+            let usersHtml = '<h3>Search Results by Age:</h3><ul>';
             data.data.forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.textContent = `Name: ${user.first_name} ${user.last_name}, Age: ${user.age}`;
-                resultsContainer.appendChild(userDiv);
+                usersHtml += `<li>Username: ${user.username}, Name: ${user.first_name} ${user.last_name}, Age: ${user.age}</li>`;
             });
-        })
-        .catch(err => {
-            console.error('Failed to fetch users:', err);
-            resultsContainer.innerHTML = 'Failed to fetch users';
-        });
-}
+            usersHtml += '</ul>';
+            usersContainer.innerHTML = usersHtml;
+        }
+    })
+    .catch(err => console.error("Error searching users by age: ", err));
+};
 
 
 // When the "Get Users Registered Today" button is clicked

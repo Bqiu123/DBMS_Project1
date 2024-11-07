@@ -237,65 +237,66 @@ app.get('/testdb', (request, response) => {
     .catch(err => console.log(err));
 });
 
-// search users by first and/or last name
-app.get('/searchUsers', async (request, response) => {
+// Search users by first and/or last name
+app.get('/users/search', (request, response) => {
     const { firstName, lastName } = request.query;
     const db = dbService.getDbServiceInstance();
 
-    try {
-        const data = await db.searchUsersByName(firstName, lastName);
-        response.json({ data: data });
-    } catch (err) {
-        console.log(err);
-        response.status(500).json({ success: false, message: "Failed to fetch users" });
-    }
+    const result = db.searchUsersByName(firstName, lastName);
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to search users" });
+        });
 });
 
-// search users by userid
-
-app.get('/searchUserById/:userId', async (request, response) => {
-    const { userId } = request.params;
+// Search user by ID
+app.get('/users/searchById', (request, response) => {
+    const { id } = request.query;
     const db = dbService.getDbServiceInstance();
 
-    try {
-        const data = await db.searchUserById(userId);
-        if (data.length === 0) {
-            return response.status(404).json({ success: false, message: "User not found" });
-        }
-        response.json({ data: data[0] }); // assuming ID is unique and only one record should be returned
-    } catch (err) {
-        console.log(err);
-        response.status(500).json({ success: false, message: "Failed to fetch user" });
-    }
+    const result = db.searchUserById(id);
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to search user" });
+        });
 });
 
-// search usrs whose salary is between x and y
-app.get('/searchUsersBySalary', async (request, response) => {
+// Search users by salary range
+app.get('/users/searchBySalary', (request, response) => {
     const { minSalary, maxSalary } = request.query;
     const db = dbService.getDbServiceInstance();
 
-    try {
-        const data = await db.searchUsersBySalaryRange(minSalary, maxSalary);
-        response.json({ data: data });
-    } catch (err) {
-        console.log(err);
-        response.status(500).json({ success: false, message: "Failed to fetch users" });
-    }
+    const result = db.searchUsersBySalaryRange(minSalary, maxSalary);
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to search users by salary" });
+        });
 });
 
-// seach all users whose age is between x and y
-app.get('/searchUsersByAge', async (request, response) => {
+// Search users by age range
+app.get('/users/searchByAge', (request, response) => {
     const { minAge, maxAge } = request.query;
     const db = dbService.getDbServiceInstance();
 
-    try {
-        const data = await db.searchUsersByAgeRange(minAge, maxAge);
-        response.json({ data: data });
-    } catch (err) {
-        console.log(err);
-        response.status(500).json({ success: false, message: "Failed to fetch users" });
-    }
+    const result = db.searchUsersByAgeRange(minAge, maxAge);
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to search users by age" });
+        });
 });
+
 
 
 // set up the web server listener

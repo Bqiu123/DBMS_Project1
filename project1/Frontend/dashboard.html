@@ -13,30 +13,43 @@
         <h1>Welcome to the Dashboard</h1>
         <p>Manage User</p>
 
+        <div>
+            <label for="search-first-name">First Name:</label>
+            <input type="text" id="search-first-name">
+            <label for="search-last-name">Last Name:</label>
+            <input type="text" id="search-last-name">
+            <button id="search-users-btn">Search Users</button>
+        </div>
+        <div id="search-users-result"></div>
+
+        <div>
+            <label for="search-user-id">User ID:</label>
+            <input type="text" id="search-user-id">
+            <button id="search-user-by-id-btn">Search User by ID</button>
+        </div>
+        <div id="search-user-by-id-result"></div>
+
+         <div>
+            <label for="min-salary">Min Salary:</label>
+            <input type="number" id="min-salary">
+            <label for="max-salary">Max Salary:</label>
+            <input type="number" id="max-salary">
+            <button id="search-users-by-salary-btn">Search Users by Salary Range</button>
+        </div>
+        <div id="search-users-by-salary-result"></div>
+
+        <div>
+            <label for="min-age">Min Age:</label>
+            <input type="number" id="min-age">
+            <label for="max-age">Max Age:</label>
+            <input type="number" id="max-age">
+            <button id="search-users-by-age-btn">Search Users by Age Range</button>
+        </div>
+        <div id="search-users-by-age-result"></div>
+
+
         <button id="get-never-logged-in-btn">Get Users Who Have Never Logged In</button>
         <div id="never-logged-in-users"></div>
-
-
-        <input type="text" id="firstNameInput" placeholder="First Name">
-        <input type="text" id="lastNameInput" placeholder="Last Name">
-        <button onclick="searchUsers()">Search Users</button>
-        <div id="searchResults"></div>
-
-        <input type="text" id="userIdInput" placeholder="User ID">
-        <button onclick="searchUserById()">Search User by ID</button>
-        <div id="userIdResults"></div>
-
-        <input type="number" id="minSalaryInput" placeholder="Minimum Salary">
-        <input type="number" id="maxSalaryInput" placeholder="Maximum Salary">
-        <button onclick="searchUsersBySalary()">Search Users by Salary</button>
-        <div id="salarySearchResults"></div>
-
-        <input type="number" id="minAgeInput" placeholder="Minimum Age">
-        <input type="number" id="maxAgeInput" placeholder="Maximum Age">
-        <button onclick="searchUsersByAge()">Search Users by Age</button>
-        <div id="ageSearchResults"></div>
-
-
 
         <button id="search-after-john-btn">Search Users Registered After John</button>
         <div id="users-registered-after-john"></div>
