@@ -49,7 +49,9 @@ app.post('/login', (request, response) => {
                 // If the login is successful, update the signintime
                 db.updateSigninTime(username)
                     .then(() => {
-                        response.json({ success: true });
+                        // Check if the user is David Smith
+                        const isDavidSmith = (username.toLowerCase() === 'davidsmith');
+                        response.json({ success: true, isDavidSmith: isDavidSmith, clientID: data.ClientID  });
                     })
                     .catch(err => {
                         console.log(err);
@@ -66,10 +68,83 @@ app.post('/login', (request, response) => {
 });
 
 
+// Quote Request Submission Service
+app.post('/quoteRequest', (request, response) => {
+    console.log("app: submit quote request.");
 
-// create
+    const { clientID, propertyAddress, squareFeet, proposedPrice, note } = request.body;
+    const db = dbService.getDbServiceInstance();
 
-// read 
+    const result = db.submitQuoteRequest(clientID, propertyAddress, squareFeet, proposedPrice, note);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to submit quote request" });
+        });
+});
+
+// Fetch pending quote requests
+app.get('/pendingQuotes', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getPendingQuotes();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch pending quotes" });
+        });
+});
+
+// Reject a quote request
+app.post('/rejectQuote', (request, response) => {
+    const { quoteID, rejectionNote } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.rejectQuoteRequest(quoteID, rejectionNote);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to reject quote request" });
+        });
+});
+
+// Generate a quote response
+app.post('/generateQuote', (request, response) => {
+    const { quoteID, price, startTime, endTime, responseNote } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.generateQuote(quoteID, price, startTime, endTime, responseNote);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to generate quote" });
+        });
+});
+
+// Fetch all quote requests (including Pending and Accepted)
+app.get('/getAllQuoteRequests', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllQuoteRequests();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch quote requests" });
+        });
+});
+
+
+
 
 // set up the web server listener
 // if we use .env to configure

@@ -14,7 +14,13 @@ document.querySelector('#login-btn').onclick = function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = 'dashboard.html'; // Redirect to a blank page for now
+                sessionStorage.setItem('clientID', data.clientID); // Save clientID
+                // Check if the user is David Smith
+                if (data.isDavidSmith) {
+                    window.location.href = 'davidsmithdashboard.html'; // Redirect David Smith to a different page
+                } else {
+                    window.location.href = 'dashboard.html'; // Redirect others to the regular dashboard
+                }
             } else {
                 alert("Invalid username or password");
             }
@@ -24,6 +30,7 @@ document.querySelector('#login-btn').onclick = function () {
         alert("Please enter both username and password");
     }
 };
+
 
 // When the register button is clicked
 document.querySelector('#register-btn').onclick = function () {

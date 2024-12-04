@@ -117,7 +117,11 @@ class DbService{
             const query = "SELECT * FROM client WHERE username = ? AND password = ?;";
             connection.query(query, [username, password], (err, results) => {
                   if (err) reject(new Error(err.message));
-                  else resolve(results.length > 0);
+                  else if (results.length > 0) {
+                     resolve(results[0]); // Returning the entire row, including ClientID
+                 } else {
+                     resolve(null);
+                 }
             });
          });
 
@@ -144,6 +148,123 @@ class DbService{
          console.log(error);
       }
    }
+
+   async submitQuoteRequest(clientID, propertyAddress, squareFeet, proposedPrice, note) {
+      try {
+          const response = await new Promise((resolve, reject) => {
+              const query = `
+                  INSERT INTO QuoteRequest (ClientID, PropertyAddress, SquareFeet, ProposedPrice, Note)
+                  VALUES (?, ?, ?, ?, ?);
+              `;
+              connection.query(query, [clientID, propertyAddress, squareFeet, proposedPrice, note], (err, result) => {
+                  if (err) reject(new Error(err.message));
+                  else resolve(result.insertId);
+              });
+          });
+
+          console.log("New quote request submitted with ID: ", response);
+          return response;
+      } catch (error) {
+          console.log(error);
+      }
+  }
+
+  async getPendingQuotes() {
+   try {
+       const response = await new Promise((resolve, reject) => {
+           const query = "SELECT * FROM QuoteRequest WHERE RequestStatus = 'Pending'";
+           connection.query(query, (err, results) => {
+               if (err) reject(new Error(err.message));
+               else resolve(results);
+           });
+       });
+       return response;
+   } catch (error) {
+       console.log(error);
+   }
+}
+
+async rejectQuoteRequest(quoteID, rejectionNote) {
+   try {
+       // First, update the status of the QuoteRequest
+       const updateResponse = await new Promise((resolve, reject) => {
+           const query = "UPDATE QuoteRequest SET RequestStatus = 'Rejected' WHERE QuoteID = ?";
+           connection.query(query, [quoteID], (err, result) => {
+               if (err) reject(new Error(err.message));
+               else resolve(result);
+           });
+       });
+
+       // Then, insert the rejection note into QuoteRejection table
+       const insertResponse = await new Promise((resolve, reject) => {
+           const query = "INSERT INTO QuoteRejection (QuoteID, RejectionNote) VALUES (?, ?)";
+           connection.query(query, [quoteID, rejectionNote], (err, result) => {
+               if (err) reject(new Error(err.message));
+               else resolve(result);
+           });
+       });
+
+       return { updateResponse, insertResponse };
+   } catch (error) {
+       console.log(error);
+   }
+}
+
+
+async generateQuote(quoteID, price, startTime, endTime, responseNote) {
+   try {
+       // First, insert the quote response into the QuoteResponse table
+       const response = await new Promise((resolve, reject) => {
+           const query = `
+               INSERT INTO QuoteResponse (QuoteID, Price, StartTime, EndTime, ResponseNote)
+               VALUES (?, ?, ?, ?, ?);
+           `;
+           connection.query(query, [quoteID, price, startTime, endTime, responseNote], (err, result) => {
+               if (err) {
+                  console.error("Error inserting into QuoteResponse:", err.message);
+                  reject(new Error(err.message));
+               } else {
+                     console.log("QuoteResponse inserted successfully with ID:", result.insertId);
+                     resolve(result.insertId);
+               }
+           });
+       });
+
+       // After inserting the quote response, update the quote request status to 'Confirmed'
+       await new Promise((resolve, reject) => {
+         const query = "UPDATE QuoteRequest SET RequestStatus = 'Accepted' WHERE QuoteID = ?";
+         console.log("Updating QuoteRequest status to 'Accepted' for QuoteID:", quoteID);
+         connection.query(query, [quoteID], (err, result) => {
+             if (err) {
+                 console.error("Error updating QuoteRequest status:", err.message);
+                 reject(new Error(err.message));
+             } else {
+                 console.log("QuoteRequest status updated to 'Accepted' for QuoteID:", quoteID);
+                 resolve(result);
+             }
+         });
+     });
+       return response;
+   } catch (error) {
+       console.log("Error in generateQuote:", error);
+   }
+}
+
+async getAllQuoteRequests() {
+   try {
+       const response = await new Promise((resolve, reject) => {
+           const query = "SELECT * FROM QuoteRequest WHERE RequestStatus IN ('Pending', 'Accepted', 'Rejected')";
+           connection.query(query, (err, results) => {
+               if (err) reject(new Error(err.message));
+               else resolve(results);
+           });
+       });
+       return response;
+   } catch (error) {
+       console.log(error);
+   }
+}
+
 
 
 }
