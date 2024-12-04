@@ -17,14 +17,13 @@ app.use(express.urlencoded({extended: false}));
 
 
 // Register service
-// Register service
 app.post('/register', (request, response) => {
     console.log("app: register a new user.");
 
-    const { username, firstName, lastName, age, salary, password } = request.body;
+    const { username, firstName, lastName, address, creditCardNumber, phoneNumber, email, password } = request.body;
     const db = dbService.getDbServiceInstance();
 
-    const result = db.registerUser(username, firstName, lastName, age, salary, password);
+    const result = db.registerUser(username, firstName, lastName, address, creditCardNumber, phoneNumber, email, password);
 
     result
         .then(data => response.json({ success: true }))

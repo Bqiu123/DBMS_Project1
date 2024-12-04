@@ -88,27 +88,27 @@ class DbService{
    the function to pause until the query is completed.
    */
 
-   async registerUser(username, firstName, lastName, age, salary, password) {
+   async registerUser(username, firstName, lastName, address, creditCardNumber, phoneNumber, email, password) {
       try {
-         const dateRegistered = new Date();
-         const response = await new Promise((resolve, reject) => {
-            const query = `
-                  INSERT INTO users (username, first_name, last_name, age, salary, password, date_registered)
-                  VALUES (?, ?, ?, ?, ?, ?, ?);
-            `;
-            connection.query(query, [username, firstName, lastName, age, salary, password, dateRegistered], (err, result) => {
+          const dateRegistered = new Date();
+          const response = await new Promise((resolve, reject) => {
+              const query = `
+                  INSERT INTO users (username, first_name, last_name, address, credit_card_number, phone_number, email, password, date_registered)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+              `;
+              connection.query(query, [username, firstName, lastName, address, creditCardNumber, phoneNumber, email, password, dateRegistered], (err, result) => {
                   if (err) reject(new Error(err.message));
                   else resolve(result.insertId);
-            });
-         });
-
-         console.log("New user registered with ID: ", response);
-         return response;
+              });
+          });
+  
+          console.log("New user registered with ID: ", response);
+          return response;
       } catch (error) {
-         console.log(error);
+          console.log(error);
       }
-   }
-
+  }
+  
 
 
    async authenticateUser(username, password) {
