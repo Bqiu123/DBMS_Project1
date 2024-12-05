@@ -68,6 +68,16 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('http://localhost:5050/getAllQuoteRequests')
         .then(response => response.json())
         .then(data => loadQuoteRequestsTable(data['data']));
+    
+    // Add event listener for the logout button
+    const logoutButton = document.querySelector('#logout-btn');
+    logoutButton.onclick = function () {
+        // Clear any stored session data (if applicable)
+        // For example: sessionStorage.removeItem('userSession');
+        
+        // Redirect to the login page
+        window.location.href = 'login.html';
+    };
 });
 
 
