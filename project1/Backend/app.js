@@ -173,6 +173,50 @@ app.get('/quoteResponse/:quoteID', (request, response) => {
 });
 
 
+// Accept Quote
+app.post('/acceptQuote', (request, response) => {
+    const { quoteID } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.acceptQuote(quoteID);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to accept quote" });
+        });
+});
+
+// Reject Quote Response
+app.post('/rejectQuoteResponse', (request, response) => {
+    const { quoteID } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.rejectQuoteResponse(quoteID);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to reject quote response" });
+        });
+});
+
+// Negotiate Quote
+app.post('/negotiateQuote', (request, response) => {
+    const { quoteID, note } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.negotiateQuote(quoteID, note);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to submit negotiation note" });
+        });
+});
 
 
 

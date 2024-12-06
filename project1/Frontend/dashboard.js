@@ -1,6 +1,5 @@
 // dashboard.js
 
-
 // When the "Submit Request for Quote" button is clicked
 document.querySelector('#submit-quote-btn').onclick = function () {
     const propertyAddress = document.querySelector('#property-address').value;
@@ -8,7 +7,6 @@ document.querySelector('#submit-quote-btn').onclick = function () {
     const proposedPrice = document.querySelector('#proposed-price').value;
     const note = document.querySelector('#note').value;
 
-    // Assuming the client ID is stored in session storage after login
     const clientID = sessionStorage.getItem('clientID');
 
     if (!clientID) {
@@ -16,7 +14,6 @@ document.querySelector('#submit-quote-btn').onclick = function () {
         return;
     }
 
-    // Send a POST request to the backend to save the quote request
     fetch('http://localhost:5050/quoteRequest', {
         headers: {
             'Content-type': 'application/json'
@@ -34,7 +31,6 @@ document.querySelector('#submit-quote-btn').onclick = function () {
     .then(data => {
         if (data.success) {
             alert("Quote request submitted successfully.");
-            // Clear the form fields after successful submission
             document.querySelector('#property-address').value = "";
             document.querySelector('#square-feet').value = "";
             document.querySelector('#proposed-price').value = "";
@@ -93,19 +89,16 @@ function loadClientRequestsTable(data) {
         tableBody.innerHTML += row;
     });
 
-    // Add event listeners to toggle buttons
     document.querySelectorAll('.toggle-result-btn').forEach(button => {
         button.onclick = function () {
             const quoteID = button.dataset.id;
             const isVisible = button.dataset.visible === 'true';
 
             if (isVisible) {
-                // Hide the result and update the button
                 document.querySelector('#quote-result-section').style.display = 'none';
                 button.textContent = 'View Quote';
                 button.dataset.visible = 'false';
             } else {
-                // Fetch and show the result
                 fetchQuoteResponseDetails(quoteID, button);
             }
         };
@@ -129,20 +122,113 @@ function displayQuoteResponseDetails(details, button) {
     const resultSection = document.querySelector('#quote-result-section');
     const detailsDiv = document.querySelector('#quote-details');
 
-    // Populate the details into the section
+    // Format start and end times to match the database format
+    const startTime = new Date(details.StartTime).toLocaleString('en-GB', { hour12: false });
+    const endTime = new Date(details.EndTime).toLocaleString('en-GB', { hour12: false });
+
     detailsDiv.innerHTML = `
         <p><strong>Price:</strong> ${details.Price}</p>
-        <p><strong>Start Time:</strong> ${details.StartTime}</p>
-        <p><strong>End Time:</strong> ${details.EndTime}</p>
+        <p><strong>Start Time:</strong> ${startTime}</p>
+        <p><strong>End Time:</strong> ${endTime}</p>
         <p><strong>Response Note:</strong> ${details.ResponseNote}</p>
     `;
 
-    // Show the result section and update the button
     resultSection.style.display = 'block';
     button.textContent = 'Hide Quote';
     button.dataset.visible = 'true';
+
+    // Attach event listeners for "Accept", "Reject", "Negotiate" buttons
+    document.querySelector('#accept-quote-btn').onclick = function () {
+        acceptQuote(button.dataset.id);
+    };
+
+    document.querySelector('#reject-quote-btn').onclick = function () {
+        rejectQuote(button.dataset.id);
+    };
+
+    document.querySelector('#negotiate-quote-btn').onclick = function () {
+        document.querySelector('#negotiate-form').style.display = 'block';
+        document.querySelector('#submit-negotiate-btn').onclick = function () {
+            const note = document.querySelector('#negotiate-note').value;
+            negotiateQuote(button.dataset.id, note);
+        };
+    };
 }
 
+function acceptQuote(quoteID) {
+    fetch('http://localhost:5050/acceptQuote', {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({ quoteID: quoteID })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Quote accepted successfully.");
+            updateQuoteUI('accepted');
+        } else {
+            alert("Failed to accept quote.");
+        }
+    })
+    .catch(err => console.error("Error accepting quote: ", err));
+}
+
+function rejectQuote(quoteID) {
+    fetch('http://localhost:5050/rejectQuoteResponse', {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({ quoteID: quoteID })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Quote rejected successfully.");
+            updateQuoteUI('rejected');
+        } else {
+            alert("Failed to reject quote.");
+        }
+    })
+    .catch(err => console.error("Error rejecting quote: ", err));
+}
+
+function negotiateQuote(quoteID, note) {
+    fetch('http://localhost:5050/negotiateQuote', {
+        headers: {
+            'Content-type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({ quoteID: quoteID, note: note })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Negotiation note submitted successfully.");
+            location.reload(); // Keep buttons unchanged
+        } else {
+            alert("Failed to submit negotiation note.");
+        }
+    })
+    .catch(err => console.error("Error negotiating quote: ", err));
+}
+
+// Helper function to update the UI after accepting or rejecting the quote
+function updateQuoteUI(action) {
+    const quoteActions = document.querySelector('#quote-actions');
+    const negotiateForm = document.querySelector('#negotiate-form');
+
+    quoteActions.style.display = 'none';
+    negotiateForm.style.display = 'none';
+
+    if (action === 'accepted') {
+        document.querySelector('#quote-details').innerHTML += `<p><strong>Quote Status:</strong> Quote Accepted</p>`;
+    } else if (action === 'rejected') {
+        document.querySelector('#quote-details').innerHTML += `<p><strong>Quote Status:</strong> Quote Rejected</p>`;
+    }
+}
 
 
 // When the "Logout" button is clicked

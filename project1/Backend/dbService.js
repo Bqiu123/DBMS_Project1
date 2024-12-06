@@ -315,6 +315,72 @@ async getQuoteResponseDetails(quoteID) {
     }
 }
 
+async acceptQuote(quoteID) {
+    try {
+        // Update the QuoteResponse table to mark the quote as 'Accepted'
+        const updateQuoteStatus = await new Promise((resolve, reject) => {
+            const query = "UPDATE QuoteResponse SET QuoteStatus = 'Accepted', AcceptedTime = ? WHERE QuoteID = ?";
+            const currentTime = new Date();
+            connection.query(query, [currentTime, quoteID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result);
+            });
+        });
+
+        // Insert a new record into the Order table
+        const createOrder = await new Promise((resolve, reject) => {
+            const query = `
+                INSERT INTO \`Order\` (QuoteID, WorkStartTime, WorkEndTime)
+                SELECT ?, StartTime, EndTime FROM QuoteResponse WHERE QuoteID = ?;
+            `;
+            connection.query(query, [quoteID, quoteID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result);
+            });
+        });
+
+        return { updateQuoteStatus, createOrder };
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+async rejectQuoteResponse(quoteID) {
+    try {
+        // Update the QuoteResponse table to mark the quote as 'Rejected'
+        const response = await new Promise((resolve, reject) => {
+            const query = "UPDATE QuoteResponse SET QuoteStatus = 'Rejected' WHERE QuoteID = ?";
+            connection.query(query, [quoteID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result);
+            });
+        });
+
+        return response;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+async negotiateQuote(quoteID, note) {
+    try {
+        // Update the ClientNote in the QuoteResponse table
+        const response = await new Promise((resolve, reject) => {
+            const query = "UPDATE QuoteResponse SET ClientNote = ? WHERE QuoteID = ?";
+            connection.query(query, [note, quoteID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result);
+            });
+        });
+
+        return response;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 }
 
