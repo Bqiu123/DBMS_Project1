@@ -265,6 +265,55 @@ async getAllQuoteRequests() {
    }
 }
 
+async getClientRequests(clientID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    qr.QuoteID, qr.PropertyAddress, qr.SquareFeet, qr.ProposedPrice, qr.Note, qr.RequestStatus,
+                    qres.Price, qres.StartTime, qres.EndTime, qres.ResponseNote,
+                    qrej.RejectionNote
+                FROM 
+                    QuoteRequest qr
+                LEFT JOIN 
+                    QuoteResponse qres ON qr.QuoteID = qres.QuoteID
+                LEFT JOIN 
+                    QuoteRejection qrej ON qr.QuoteID = qrej.QuoteID
+                WHERE 
+                    qr.ClientID = ?
+            `;
+            connection.query(query, [clientID], (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+async getQuoteResponseDetails(quoteID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT Price, StartTime, EndTime, ResponseNote
+                FROM QuoteResponse
+                WHERE QuoteID = ?
+            `;
+            connection.query(query, [quoteID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result[0]);
+            });
+        });
+
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
 }

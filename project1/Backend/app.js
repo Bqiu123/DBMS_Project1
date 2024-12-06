@@ -143,6 +143,36 @@ app.get('/getAllQuoteRequests', (request, response) => {
         });
 });
 
+// Fetch all requests made by a specific client
+app.get('/clientRequests/:clientID', (request, response) => {
+    const { clientID } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getClientRequests(clientID);
+
+    result
+        .then(data => response.json({ success: true, data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch client requests" });
+        });
+});
+
+app.get('/quoteResponse/:quoteID', (request, response) => {
+    const { quoteID } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getQuoteResponseDetails(quoteID);
+
+    result
+        .then(data => response.json({ success: true, data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch quote response details" });
+        });
+});
+
+
 
 
 
