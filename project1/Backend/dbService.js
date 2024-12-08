@@ -382,6 +382,61 @@ async negotiateQuote(quoteID, note) {
     }
 }
 
+async getQuotesWithNotes() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT * FROM QuoteResponse
+                WHERE QuoteStatus = 'Pending' AND ClientNote IS NOT NULL;
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedEndTime) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            let query = "UPDATE QuoteResponse SET ";
+            const params = [];
+
+            if (adjustedPrice) {
+                query += "Price = ?, ";
+                params.push(adjustedPrice);
+            }
+            if (adjustedStartTime) {
+                query += "StartTime = ?, ";
+                params.push(adjustedStartTime);
+            }
+            if (adjustedEndTime) {
+                query += "EndTime = ?, ";
+                params.push(adjustedEndTime);
+            }
+
+            // Remove the last comma and space
+            query = query.slice(0, -2);
+
+            query += " WHERE QuoteID = ?";
+            params.push(quoteID);
+
+            connection.query(query, params, (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result.affectedRows);
+            });
+        });
+        return response > 0 ? true : false;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
 }
 
 module.exports = DbService;

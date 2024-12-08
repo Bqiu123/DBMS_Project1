@@ -218,6 +218,34 @@ app.post('/negotiateQuote', (request, response) => {
         });
 });
 
+// Fetch quotes with Pending status and ClientNote
+app.get('/quotesWithNotes', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getQuotesWithNotes();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch quotes with notes" });
+        });
+});
+
+// Update quote details
+app.post('/updateQuoteDetails', (request, response) => {
+    const { quoteID, adjustedPrice, adjustedStartTime, adjustedEndTime } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedEndTime);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to update quote details" });
+        });
+});
 
 
 // set up the web server listener

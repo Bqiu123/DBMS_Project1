@@ -50,6 +50,33 @@
             <button id="submit-quote-btn">Submit Quote</button>
         </div>
 
+        <h2>Quotes with Client Notes</h2>
+            <table id="client-notes-table">
+                <thead>
+                    <tr>
+                        <th>Quote ID</th>
+                        <th>Client Note</th>
+                        <th>Price</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="update-quote-form" style="display: none;">
+                <h3>Update Quote Details</h3>
+                <label for="adjusted-price">Adjusted Price:</label>
+                <input type="number" id="adjusted-price" step="0.01" required><br>
+                <label for="adjusted-start-time">Adjusted Start Time:</label>
+                <input type="datetime-local" id="adjusted-start-time" required><br>
+                <label for="adjusted-end-time">Adjusted End Time:</label>
+                <input type="datetime-local" id="adjusted-end-time" required><br>
+                <button id="submit-update-btn">Submit Updates</button>
+            </div>
+
+
         <script src="davidsmithdashboard.js"></script>
     </main>
 </body>

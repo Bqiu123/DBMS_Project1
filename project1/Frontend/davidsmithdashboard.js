@@ -121,3 +121,106 @@ function generateQuote(quoteID, price, startTime, endTime, responseNote) {
     })
     .catch(err => console.error("Error generating quote: ", err));
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch quotes with client notes
+    fetch('http://localhost:5050/quotesWithNotes')
+        .then(response => response.json())
+        .then(data => loadClientNotesTable(data['data']));
+
+    // Add event listener to handle logout
+    const logoutButton = document.querySelector('#logout-btn');
+    logoutButton.onclick = function () {
+        window.location.href = 'login.html';
+    };
+});
+
+function formatDateTimeToLocal(dateTime) {
+    const date = new Date(dateTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
+function loadClientNotesTable(data) {
+    const tableBody = document.querySelector('#client-notes-table tbody');
+    tableBody.innerHTML = '';
+
+    data.forEach((quote) => {
+        const formattedStartTime = formatDateTimeToLocal(quote.StartTime);
+        const formattedEndTime = formatDateTimeToLocal(quote.EndTime);
+
+        let row = `<tr>
+                    <td>${quote.QuoteID}</td>
+                    <td>${quote.ClientNote}</td>
+                    <td>${quote.Price}</td>
+                    <td>${formattedStartTime}</td>
+                    <td>${formattedEndTime}</td>
+                    <td>
+                        <button class="adjust-quote-btn" data-id="${quote.QuoteID}" data-price="${quote.Price}" data-start="${formattedStartTime}" data-end="${formattedEndTime}">Adjust</button>
+                    </td>
+                </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    document.querySelectorAll('.adjust-quote-btn').forEach((button) => {
+        button.onclick = function () {
+            const quoteID = button.dataset.id;
+            const originalPrice = button.dataset.price;
+            const originalStart = button.dataset.start;
+            const originalEnd = button.dataset.end;
+
+            document.querySelector('#adjusted-price').value = "";
+            document.querySelector('#adjusted-start-time').value = "";
+            document.querySelector('#adjusted-end-time').value = "";
+
+            document.querySelector('#update-quote-form').style.display = 'block';
+
+            document.querySelector('#submit-update-btn').onclick = function () {
+                const adjustedPrice = document.querySelector('#adjusted-price').value || originalPrice;
+                const adjustedStartTime = document.querySelector('#adjusted-start-time').value || originalStart;
+                const adjustedEndTime = document.querySelector('#adjusted-end-time').value || originalEnd;
+
+                updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedEndTime);
+            };
+        };
+    });
+}
+
+
+function updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedEndTime) {
+    const body = { quoteID };
+
+    if (adjustedPrice.trim() !== "") {
+        body.adjustedPrice = adjustedPrice;
+    }
+    if (adjustedStartTime.trim() !== "") {
+        body.adjustedStartTime = adjustedStartTime;
+    }
+    if (adjustedEndTime.trim() !== "") {
+        body.adjustedEndTime = adjustedEndTime;
+    }
+
+    fetch('http://localhost:5050/updateQuoteDetails', {
+        headers: {
+            'Content-type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(body),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                alert("Quote updated successfully.");
+                location.reload();
+            } else {
+                alert("Failed to update quote.");
+            }
+        })
+        .catch((err) => console.error("Error updating quote:", err));
+}
