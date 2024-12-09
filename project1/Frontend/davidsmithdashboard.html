@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>David Smith Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <main>
@@ -75,6 +76,21 @@
                 <input type="datetime-local" id="adjusted-end-time" required><br>
                 <button id="submit-update-btn">Submit Updates</button>
             </div>
+            <h2>Pending Orders</h2>
+                <table id="pending-orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Quote ID</th>
+                            <th>Property Address</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
 
 
         <script src="davidsmithdashboard.js"></script>

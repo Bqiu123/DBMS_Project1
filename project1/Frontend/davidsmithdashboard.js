@@ -224,3 +224,65 @@ function updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedE
         })
         .catch((err) => console.error("Error updating quote:", err));
 }
+
+function loadPendingOrdersTable() {
+    fetch('http://localhost:5050/pendingOrders')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#pending-orders-table tbody');
+            tableBody.innerHTML = '';
+
+            data['data'].forEach(order => {
+                let row = `
+                    <tr>
+                        <td>${order.OrderID}</td>
+                        <td>${order.QuoteID}</td>
+                        <td>${order.PropertyAddress}</td>
+                        <td>${order.Price}</td>
+                        <td>${order.Status}</td>
+                        <td>
+                            <button class="generate-bill-btn" data-id="${order.OrderID}">Generate Bill</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+            // Add event listeners to "Generate Bill" buttons
+            document.querySelectorAll('.generate-bill-btn').forEach(button => {
+                button.onclick = function () {
+                    const orderID = button.dataset.id;
+                    if (confirm("Did you finish the work for this order?")) {
+                        generateBill(orderID);
+                    }
+                };
+            });
+        })
+        .catch(err => console.error("Error loading pending orders:", err));
+}
+
+
+function generateBill(orderID) {
+    fetch('http://localhost:5050/generateBill', {
+        headers: {
+            'Content-type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({ orderID: orderID }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Bill generated successfully.");
+                loadPendingOrdersTable();
+            } else {
+                alert("Failed to generate bill.");
+            }
+        })
+        .catch(err => console.error("Error generating bill:", err));
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    loadPendingOrdersTable();
+});
+

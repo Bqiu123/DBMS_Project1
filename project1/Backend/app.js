@@ -248,6 +248,36 @@ app.post('/updateQuoteDetails', (request, response) => {
 });
 
 
+// Fetch pending orders
+app.get('/pendingOrders', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getPendingOrders();
+
+    result
+        .then(data => response.json({ data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch pending orders" });
+        });
+});
+
+// Generate a bill for an order and update its status to Completed
+app.post('/generateBill', (request, response) => {
+    const { orderID } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.generateBillAndCompleteOrder(orderID);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to generate bill and update order status" });
+        });
+});
+
+
 // set up the web server listener
 // if we use .env to configure
 /*

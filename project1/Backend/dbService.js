@@ -437,6 +437,76 @@ async updateQuoteDetails(quoteID, adjustedPrice, adjustedStartTime, adjustedEndT
 }
 
 
+async getPendingOrders() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT o.OrderID, o.QuoteID, o.Status, qr.Price, qr.StartTime, qr.EndTime, qr.ResponseNote, 
+                       qreq.PropertyAddress
+                FROM \`Order\` o
+                JOIN QuoteResponse qr ON o.QuoteID = qr.QuoteID
+                JOIN QuoteRequest qreq ON qr.QuoteID = qreq.QuoteID
+                WHERE o.Status = 'Pending';
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+async generateBillAndCompleteOrder(orderID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            // Start a transaction to ensure both operations succeed or fail together
+            connection.beginTransaction((err) => {
+                if (err) reject(new Error(err.message));
+
+                const currentTime = new Date();
+
+                // Step 1: Insert a new bill into the Bill table with GeneratedTime
+                const insertBillQuery = `
+                    INSERT INTO Bill (OrderID, Price, BillStatus, GeneratedTime)
+                    SELECT o.OrderID, qr.Price, 'Pending', ? 
+                    FROM \`Order\` o
+                    JOIN QuoteResponse qr ON o.QuoteID = qr.QuoteID
+                    WHERE o.OrderID = ?;
+                `;
+                connection.query(insertBillQuery, [currentTime, orderID], (err, result) => {
+                    if (err) return connection.rollback(() => reject(new Error(err.message)));
+
+                    // Step 2: Update the order status to Completed
+                    const updateOrderQuery = `
+                        UPDATE \`Order\` 
+                        SET Status = 'Completed' 
+                        WHERE OrderID = ?;
+                    `;
+                    connection.query(updateOrderQuery, [orderID], (err, result) => {
+                        if (err) return connection.rollback(() => reject(new Error(err.message)));
+
+                        // Commit the transaction
+                        connection.commit((err) => {
+                            if (err) return connection.rollback(() => reject(new Error(err.message)));
+                            resolve(true);
+                        });
+                    });
+                });
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+
+
 }
 
 module.exports = DbService;

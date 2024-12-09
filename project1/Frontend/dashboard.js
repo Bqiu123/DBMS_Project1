@@ -123,8 +123,8 @@ function displayQuoteResponseDetails(details, button) {
     const detailsDiv = document.querySelector('#quote-details');
 
     // Format start and end times to match the database format
-    const startTime = new Date(details.StartTime).toLocaleString('en-GB', { hour12: false });
-    const endTime = new Date(details.EndTime).toLocaleString('en-GB', { hour12: false });
+    const startTime = new Date(details.StartTime).toLocaleString('en-US', { hour12: false });
+    const endTime = new Date(details.EndTime).toLocaleString('en-US', { hour12: false });
 
     detailsDiv.innerHTML = `
         <p><strong>Price:</strong> ${details.Price}</p>
