@@ -277,6 +277,24 @@ app.post('/generateBill', (request, response) => {
         });
 });
 
+// Check QuoteStatus for a specific QuoteID
+app.get('/checkQuoteStatus/:quoteID', (request, response) => {
+    const { quoteID } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getQuoteStatus(quoteID);
+
+    result
+        .then(status => {
+            response.json({ success: true, status: status });
+        })
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to check quote status" });
+        });
+});
+
+
 
 // set up the web server listener
 // if we use .env to configure

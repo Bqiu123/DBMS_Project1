@@ -106,54 +106,104 @@ function loadClientRequestsTable(data) {
 }
 
 function fetchQuoteResponseDetails(quoteID, button) {
+    // Fetch quote details and status from the backend
+    fetch(`http://localhost:5050/checkQuoteStatus/${quoteID}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayQuoteDetailsAndActions(data.status, quoteID, button);
+            } else {
+                alert("Failed to fetch quote details.");
+            }
+        })
+        .catch(err => console.error("Error fetching quote details:", err));
+}
+
+function displayQuoteDetailsAndActions(status, quoteID, button) {
+    const resultSection = document.querySelector('#quote-result-section');
+    const detailsDiv = document.querySelector('#quote-details');
+    const quoteActions = document.querySelector('#quote-actions');
+    const negotiateForm = document.querySelector('#negotiate-form');
+
+    // Reset UI elements
+    detailsDiv.innerHTML = "";
+    quoteActions.style.display = 'none';
+    negotiateForm.style.display = 'none';
+
+    // Fetch additional details (if required) and display them
     fetch(`http://localhost:5050/quoteResponse/${quoteID}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                displayQuoteResponseDetails(data.data, button);
+                const details = data.data;
+
+                // Format start and end times
+                const startTime = new Date(details.StartTime).toLocaleString('en-US', { hour12: false });
+                const endTime = new Date(details.EndTime).toLocaleString('en-US', { hour12: false });
+
+                // Display the quote details
+                detailsDiv.innerHTML = `
+                    <p><strong>Price:</strong> ${details.Price}</p>
+                    <p><strong>Start Time:</strong> ${startTime}</p>
+                    <p><strong>End Time:</strong> ${endTime}</p>
+                    <p><strong>Response Note:</strong> ${details.ResponseNote}</p>
+                `;
+
+                // Conditionally display action buttons or status
+                if (status === 'Pending') {
+                    // Show the action buttons
+                    quoteActions.style.display = 'block';
+
+                    // Add event listeners
+                    document.querySelector('#accept-quote-btn').onclick = function () {
+                        acceptQuote(quoteID);
+                    };
+                    document.querySelector('#reject-quote-btn').onclick = function () {
+                        rejectQuote(quoteID);
+                    };
+                    document.querySelector('#negotiate-quote-btn').onclick = function () {
+                        negotiateForm.style.display = 'block';
+                        document.querySelector('#submit-negotiate-btn').onclick = function () {
+                            const note = document.querySelector('#negotiate-note').value;
+                            negotiateQuote(quoteID, note);
+                        };
+                    };
+                } else if (status === 'Accepted') {
+                    detailsDiv.innerHTML += `<p><strong>Quote Status:</strong> Quote Accepted</p>`;
+                } else if (status === 'Rejected') {
+                    detailsDiv.innerHTML += `<p><strong>Quote Status:</strong> Quote Rejected</p>`;
+                }
+
+                // Show result section and toggle "Hide Quote" functionality
+                resultSection.style.display = 'block';
+                button.textContent = 'Hide Quote';
+                button.dataset.visible = 'true';
+
+                // Attach "Hide Quote" functionality
+                button.onclick = function () {
+                    toggleQuoteVisibility(button);
+                };
             } else {
                 alert("Failed to fetch quote response details.");
             }
         })
-        .catch(err => console.error("Error fetching quote response details:", err));
+        .catch(err => console.error("Error fetching additional quote details:", err));
 }
 
-function displayQuoteResponseDetails(details, button) {
+function toggleQuoteVisibility(button) {
     const resultSection = document.querySelector('#quote-result-section');
-    const detailsDiv = document.querySelector('#quote-details');
+    const isVisible = button.dataset.visible === 'true';
 
-    // Format start and end times to match the database format
-    const startTime = new Date(details.StartTime).toLocaleString('en-US', { hour12: false });
-    const endTime = new Date(details.EndTime).toLocaleString('en-US', { hour12: false });
-
-    detailsDiv.innerHTML = `
-        <p><strong>Price:</strong> ${details.Price}</p>
-        <p><strong>Start Time:</strong> ${startTime}</p>
-        <p><strong>End Time:</strong> ${endTime}</p>
-        <p><strong>Response Note:</strong> ${details.ResponseNote}</p>
-    `;
-
-    resultSection.style.display = 'block';
-    button.textContent = 'Hide Quote';
-    button.dataset.visible = 'true';
-
-    // Attach event listeners for "Accept", "Reject", "Negotiate" buttons
-    document.querySelector('#accept-quote-btn').onclick = function () {
-        acceptQuote(button.dataset.id);
-    };
-
-    document.querySelector('#reject-quote-btn').onclick = function () {
-        rejectQuote(button.dataset.id);
-    };
-
-    document.querySelector('#negotiate-quote-btn').onclick = function () {
-        document.querySelector('#negotiate-form').style.display = 'block';
-        document.querySelector('#submit-negotiate-btn').onclick = function () {
-            const note = document.querySelector('#negotiate-note').value;
-            negotiateQuote(button.dataset.id, note);
-        };
-    };
+    if (isVisible) {
+        resultSection.style.display = 'none';
+        button.textContent = 'View Quote';
+        button.dataset.visible = 'false';
+    } else {
+        const quoteID = button.dataset.id;
+        fetchQuoteResponseDetails(quoteID, button);
+    }
 }
+
 
 function acceptQuote(quoteID) {
     fetch('http://localhost:5050/acceptQuote', {

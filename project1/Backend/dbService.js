@@ -505,6 +505,23 @@ async generateBillAndCompleteOrder(orderID) {
     }
 }
 
+async getQuoteStatus(quoteID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = "SELECT QuoteStatus FROM QuoteResponse WHERE QuoteID = ?";
+            connection.query(query, [quoteID], (err, results) => {
+                if (err) reject(new Error(err.message));
+                else if (results.length > 0) resolve(results[0].QuoteStatus);
+                else resolve(null); // No matching record
+            });
+        });
+
+        return response; // Returns "Pending", "Accepted", or "Rejected"
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 
 }
