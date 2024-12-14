@@ -355,6 +355,52 @@ app.get('/client/:clientID', (request, response) => {
         });
 });
 
+// Fetch bills with client notes
+app.get('/billsWithNotes', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getBillsWithNotes();
+
+    result
+        .then(data => response.json({ success: true, data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch bills with client notes" });
+        });
+});
+
+// Adjust the price of a bill
+app.post('/adjustBillPrice', (request, response) => {
+    const { billID, newPrice } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.adjustBillPrice(billID, newPrice);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to adjust bill price" });
+        });
+});
+
+
+// Get revenue for a date range
+app.post('/calculateRevenue', (request, response) => {
+    const { startDate, endDate } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.calculateRevenue(startDate, endDate);
+
+    result
+        .then(data => response.json({ success: true, revenue: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to calculate revenue" });
+        });
+});
+
+
 
 // set up the web server listener
 // if we use .env to configure

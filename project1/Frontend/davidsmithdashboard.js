@@ -286,3 +286,109 @@ document.addEventListener('DOMContentLoaded', function () {
     loadPendingOrdersTable();
 });
 
+
+document.addEventListener('DOMContentLoaded', function () {
+    loadBillsWithNotesTable();
+});
+
+function loadBillsWithNotesTable() {
+    fetch('http://localhost:5050/billsWithNotes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const tableBody = document.querySelector('#bills-with-notes-table tbody');
+                tableBody.innerHTML = '';
+
+                data.data.forEach(bill => {
+                    const row = `
+                        <tr>
+                            <td>${bill.BillID}</td>
+                            <td>${bill.first_name} ${bill.last_name}</td>
+                            <td>${bill.PropertyAddress}</td>
+                            <td>${bill.Price}</td>
+                            <td>${bill.ResponseNote}</td>
+                            <td>
+                                <button class="adjust-bill-btn" data-id="${bill.BillID}" data-price="${bill.Price}">Adjust</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+                // Attach event listeners to Adjust buttons
+                document.querySelectorAll('.adjust-bill-btn').forEach(button => {
+                    button.onclick = function () {
+                        const billID = button.dataset.id;
+                        const currentPrice = button.dataset.price;
+                        adjustBillPrice(billID, currentPrice);
+                    };
+                });
+            } else {
+                alert("Failed to load bills with client notes.");
+            }
+        })
+        .catch(err => console.error("Error loading bills with client notes:", err));
+}
+
+function adjustBillPrice(billID, currentPrice) {
+    const newPrice = prompt(`Current Price: ${currentPrice}\nEnter the new price:`);
+
+    if (newPrice && !isNaN(newPrice) && newPrice > 0) {
+        fetch('http://localhost:5050/adjustBillPrice', {
+            headers: {
+                'Content-type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({ billID, newPrice }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Bill price updated successfully.");
+                    loadBillsWithNotesTable(); // Refresh the table to reflect the changes
+                } else {
+                    alert("Failed to update bill price.");
+                }
+            })
+            .catch(err => console.error("Error updating bill price:", err));
+    } else {
+        alert("Invalid price entered. Please try again.");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const calculateRevenueButton = document.querySelector('#calculate-revenue-btn');
+
+    calculateRevenueButton.onclick = function () {
+        const startDate = document.querySelector('#start-date').value;
+        const endDate = document.querySelector('#end-date').value;
+
+        if (!startDate || !endDate) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("Start date cannot be later than end date.");
+            return;
+        }
+
+        fetch('http://localhost:5050/calculateRevenue', {
+            headers: {
+                'Content-type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({ startDate, endDate })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const revenueResult = document.querySelector('#revenue-result');
+                    revenueResult.textContent = `Total Revenue: $${data.revenue.toFixed(2)}`;
+                } else {
+                    alert("Failed to calculate revenue.");
+                }
+            })
+            .catch(err => console.error("Error calculating revenue:", err));
+    };
+});

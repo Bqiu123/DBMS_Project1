@@ -602,6 +602,82 @@ async negotiateBill(billID, note) {
     }
 }
 
+async getBillsWithNotes() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    b.BillID, 
+                    b.Price, 
+                    c.first_name, 
+                    c.last_name, 
+                    q.PropertyAddress, 
+                    br.ResponseNote
+                FROM 
+                    Bill b
+                JOIN 
+                    (SELECT BillID, ResponseNote
+                     FROM BillResponse
+                     WHERE ResponseID IN (
+                         SELECT MAX(ResponseID)
+                         FROM BillResponse
+                         GROUP BY BillID
+                     )) br ON b.BillID = br.BillID
+                JOIN 
+                    \`Order\` o ON b.OrderID = o.OrderID
+                JOIN 
+                    QuoteRequest q ON o.QuoteID = q.QuoteID
+                JOIN 
+                    Client c ON q.ClientID = c.ClientID
+                WHERE 
+                    b.BillStatus = 'Pending';
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async adjustBillPrice(billID, newPrice) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `UPDATE Bill SET Price = ? WHERE BillID = ?`;
+            connection.query(query, [newPrice, billID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result.affectedRows > 0);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async calculateRevenue(startDate, endDate) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT SUM(Price) AS revenue
+                FROM Bill
+                WHERE BillStatus = 'Paid' 
+                  AND PaidTime BETWEEN ? AND ?
+            `;
+            connection.query(query, [startDate, endDate], (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results[0].revenue || 0); // Return 0 if no revenue is found
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 
 }
 
