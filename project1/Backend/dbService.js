@@ -523,6 +523,85 @@ async getQuoteStatus(quoteID) {
     }
 }
 
+async getClientBills(clientID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    b.BillID, b.Price, b.BillStatus, q.QuoteID, q.PropertyAddress 
+                FROM 
+                    Bill b
+                JOIN 
+                    \`Order\` o ON b.OrderID = o.OrderID
+                JOIN 
+                    QuoteRequest q ON o.QuoteID = q.QuoteID
+                WHERE 
+                    q.ClientID = ?;
+            `;
+            connection.query(query, [clientID], (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getClientDetails(clientID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = "SELECT credit_card_number FROM client WHERE ClientID = ?";
+            connection.query(query, [clientID], (err, results) => {
+                if (err) reject(new Error(err.message));
+                else if (results.length > 0) resolve(results[0]);
+                else resolve(null);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async payBill(billID) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = "UPDATE Bill SET BillStatus = 'Paid', PaidTime = ? WHERE BillID = ?";
+            const currentTime = new Date();
+            connection.query(query, [currentTime, billID], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result.affectedRows);
+            });
+        });
+        return response > 0 ? true : false;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+async negotiateBill(billID, note) {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                INSERT INTO BillResponse (BillID, ResponseNote)
+                VALUES (?, ?);
+            `;
+            connection.query(query, [billID, note], (err, result) => {
+                if (err) reject(new Error(err.message));
+                else resolve(result.insertId);
+            });
+        });
+
+        return response;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 
 }
 

@@ -280,6 +280,139 @@ function updateQuoteUI(action) {
     }
 }
 
+// Fetch and display bills when the page is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    const clientID = sessionStorage.getItem('clientID');
+
+    if (!clientID) {
+        alert("You must be logged in to view your bills.");
+        return;
+    }
+
+    fetch(`http://localhost:5050/clientBills/${clientID}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadClientBillsTable(data.data);
+            } else {
+                alert("Failed to load client bills.");
+            }
+        })
+        .catch(err => console.error("Error fetching client bills:", err));
+});
+
+
+function loadClientBillsTable(data) {
+    const tableBody = document.querySelector('#client-bills-table tbody');
+    tableBody.innerHTML = '';
+
+    data.forEach(bill => {
+        let row = `
+            <tr>
+                <td>${bill.BillID}</td>
+                <td>${bill.QuoteID}</td>
+                <td>${bill.PropertyAddress}</td>
+                <td>${bill.Price}</td>
+                <td>
+        `;
+
+        if (bill.BillStatus === 'Paid') {
+            row += `<span>Bill Paid</span>`;
+        } else {
+            row += `
+                <button class="pay-bill-btn" data-id="${bill.BillID}" data-client="${bill.ClientID}">Pay</button>
+                <button class="negotiate-bill-btn" data-id="${bill.BillID}">Negotiate</button>
+            `;
+        }
+
+        row += `</td></tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    // Attach event listeners to buttons only for unpaid bills
+    document.querySelectorAll('.pay-bill-btn').forEach(button => {
+        button.onclick = function () {
+            const billID = button.dataset.id;
+            const clientID = sessionStorage.getItem('clientID');
+            payBill(billID, clientID);
+        };
+    });
+
+    document.querySelectorAll('.negotiate-bill-btn').forEach(button => {
+        button.onclick = function () {
+            const billID = button.dataset.id;
+            negotiateBill(billID);
+        };
+    });
+}
+
+
+function payBill(billID, clientID) {
+    fetch(`http://localhost:5050/client/${clientID}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const creditCard = data.creditCardNumber;
+                const confirmPay = confirm(`Do you want to pay with your credit card ?`);
+
+                if (confirmPay) {
+                    fetch('http://localhost:5050/payBill', {
+                        headers: {
+                            'Content-type': 'application/json'
+                        },
+                        method: 'POST',
+                        body: JSON.stringify({ billID, clientID })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Bill paid successfully.");
+                                location.reload();
+                            } else {
+                                alert("Failed to process payment.");
+                            }
+                        })
+                        .catch(err => console.error("Error processing payment:", err));
+                }
+            } else {
+                alert("Failed to fetch credit card details.");
+            }
+        })
+        .catch(err => console.error("Error fetching client details:", err));
+}
+
+function negotiateBill(billID) {
+    const note = prompt("Enter your negotiation note:");
+
+    if (note) {
+        fetch('http://localhost:5050/negotiateBill', {
+            headers: {
+                'Content-type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({ billID, note })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Negotiation note submitted successfully.");
+                    location.reload();
+                } else {
+                    alert("Failed to submit negotiation note.");
+                }
+            })
+            .catch(err => console.error("Error submitting negotiation note:", err));
+    }
+}
+
+
+
+// Fetch bills when the page is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    fetchClientBills();
+});
+
+
 
 // When the "Logout" button is clicked
 document.querySelector('#logout-btn').onclick = function () {

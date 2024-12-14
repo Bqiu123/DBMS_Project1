@@ -294,6 +294,66 @@ app.get('/checkQuoteStatus/:quoteID', (request, response) => {
         });
 });
 
+// Fetch bills for a specific client
+app.get('/clientBills/:clientID', (request, response) => {
+    const { clientID } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getClientBills(clientID);
+
+    result
+        .then(data => response.json({ success: true, data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch client bills" });
+        });
+});
+
+// Pay bill
+app.post('/payBill', (request, response) => {
+    const { billID } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.payBill(billID);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to process bill payment" });
+        });
+});
+
+
+// Negotiate a bill
+app.post('/negotiateBill', (request, response) => {
+    const { billID, note } = request.body;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.negotiateBill(billID, note);
+
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to submit negotiation note" });
+        });
+});
+
+// Fetch client details
+app.get('/client/:clientID', (request, response) => {
+    const { clientID } = request.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getClientDetails(clientID);
+
+    result
+        .then(data => response.json({ success: true, ...data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch client details" });
+        });
+});
 
 
 // set up the web server listener
