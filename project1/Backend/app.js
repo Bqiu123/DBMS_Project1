@@ -400,6 +400,174 @@ app.post('/calculateRevenue', (request, response) => {
         });
 });
 
+// Fetch all requests with client details
+app.get('/allRequests', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllRequests();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch requests" });
+        });
+});
+
+// Fetch all quote responses with client details
+app.get('/allQuoteResponses', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllQuoteResponses();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch quote responses" });
+        });
+});
+
+// Fetch all orders with client and property details
+app.get('/allOrders', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllOrders();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch orders" });
+        });
+});
+
+// Fetch all bills with client and property details
+app.get('/allBills', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllBills();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch bills" });
+        });
+});
+
+// Fetch top clients with the most completed orders for David Smith
+app.get('/topClients', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getTopClients();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch top clients" });
+        });
+});
+
+// Fetch clients with at least 3 QuoteResponses marked as Rejected or Pending
+app.get('/clientsWithPendingOrRejectedResponses', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getClientsWithPendingOrRejectedResponses();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch clients with pending or rejected responses" });
+        });
+});
+
+// Fetch accepted quote responses for the current month
+app.get('/acceptedQuotesThisMonth', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAcceptedQuotesThisMonth();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch accepted quotes for this month" });
+        });
+});
+
+// Fetch clients who registered but never submitted any requests for quotes
+app.get('/clientsWithoutRequests', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getClientsWithoutRequests();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch clients without requests" });
+        });
+});
+
+
+// Fetch locations of the largest driveways David Smith worked on
+app.get('/largestDriveways', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getLargestDriveways();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch largest driveways" });
+        });
+});
+
+// Fetch overdue bills
+app.get('/overdueBills', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getOverdueBills();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch overdue bills" });
+        });
+});
+
+// Fetch bad clients
+app.get('/badClients', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getBadClients();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch bad clients" });
+        });
+});
+
+// Fetch good clients
+app.get('/goodClients', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getGoodClients();
+
+    result
+        .then(data => response.json({ success: true, data: data }))
+        .catch(err => {
+            console.log(err);
+            response.status(500).json({ success: false, message: "Failed to fetch good clients" });
+        });
+});
 
 
 // set up the web server listener

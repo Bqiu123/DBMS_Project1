@@ -133,6 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
     logoutButton.onclick = function () {
         window.location.href = 'login.html';
     };
+
+    const rootButton = document.querySelector('#root-btn');
+    rootButton.onclick = function() {
+        window.location.href = 'root.html';
+    }
 });
 
 function formatDateTimeToLocal(dateTime) {
@@ -392,3 +397,4 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => console.error("Error calculating revenue:", err));
     };
 });
+

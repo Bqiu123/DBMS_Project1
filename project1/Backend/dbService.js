@@ -678,6 +678,436 @@ async calculateRevenue(startDate, endDate) {
     }
 }
 
+async getAllRequests() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    qr.QuoteID, 
+                    qr.PropertyAddress, 
+                    qr.SquareFeet, 
+                    qr.ProposedPrice, 
+                    qr.Note, 
+                    qr.RequestStatus, 
+                    c.ClientID, 
+                    c.first_name, 
+                    c.last_name
+                FROM 
+                    QuoteRequest qr
+                JOIN 
+                    Client c ON qr.ClientID = c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getAllQuoteResponses() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    qrsp.ResponseID, 
+                    qrsp.QuoteID, 
+                    qrsp.Price, 
+                    qrsp.StartTime, 
+                    qrsp.EndTime, 
+                    qrsp.ResponseNote, 
+                    qrsp.QuoteStatus, 
+                    qr.ClientID, 
+                    qr.PropertyAddress,
+                    c.first_name, 
+                    c.last_name
+                FROM 
+                    QuoteResponse qrsp
+                JOIN 
+                    QuoteRequest qr ON qrsp.QuoteID = qr.QuoteID
+                JOIN 
+                    Client c ON qr.ClientID = c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getAllOrders() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    o.OrderID, 
+                    o.QuoteID, 
+                    o.Status, 
+                    o.WorkStartTime, 
+                    o.WorkEndTime, 
+                    qr.ClientID, 
+                    qr.PropertyAddress, 
+                    c.first_name, 
+                    c.last_name
+                FROM 
+                    \`Order\` o
+                JOIN 
+                    QuoteResponse qres ON o.QuoteID = qres.QuoteID
+                JOIN 
+                    QuoteRequest qr ON qres.QuoteID = qr.QuoteID
+                JOIN 
+                    Client c ON qr.ClientID = c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getAllBills() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    b.BillID, 
+                    b.OrderID, 
+                    b.Price, 
+                    b.BillStatus, 
+                    b.GeneratedTime, 
+                    b.PaidTime, 
+                    o.QuoteID, 
+                    qr.ClientID, 
+                    qr.PropertyAddress, 
+                    c.first_name, 
+                    c.last_name
+                FROM 
+                    Bill b
+                JOIN 
+                    \`Order\` o ON b.OrderID = o.OrderID
+                JOIN 
+                    QuoteResponse qres ON o.QuoteID = qres.QuoteID
+                JOIN 
+                    QuoteRequest qr ON qres.QuoteID = qr.QuoteID
+                JOIN 
+                    Client c ON qr.ClientID = c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getTopClients() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                WITH CompletedOrdersCount AS (
+                    SELECT 
+                        c.ClientID,
+                        c.first_name,
+                        c.last_name,
+                        COUNT(o.OrderID) AS CompletedOrders
+                    FROM 
+                        \`Order\` o
+                    JOIN 
+                        QuoteResponse qr ON o.QuoteID = qr.QuoteID
+                    JOIN 
+                        QuoteRequest qreq ON qr.QuoteID = qreq.QuoteID
+                    JOIN 
+                        Client c ON qreq.ClientID = c.ClientID
+                    WHERE 
+                        o.Status = 'Completed'
+                    GROUP BY 
+                        c.ClientID
+                ),
+                MaxOrders AS (
+                    SELECT MAX(CompletedOrders) AS MaxCompletedOrders
+                    FROM CompletedOrdersCount
+                )
+                SELECT 
+                    co.ClientID,
+                    co.first_name,
+                    co.last_name,
+                    co.CompletedOrders
+                FROM 
+                    CompletedOrdersCount co
+                JOIN 
+                    MaxOrders mo ON co.CompletedOrders = mo.MaxCompletedOrders;
+            `;
+
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getClientsWithPendingOrRejectedResponses() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    c.ClientID, 
+                    c.first_name, 
+                    c.last_name, 
+                    COUNT(qres.ResponseID) AS AffectedResponses
+                FROM 
+                    Client c
+                JOIN 
+                    QuoteRequest qreq ON c.ClientID = qreq.ClientID
+                JOIN 
+                    QuoteResponse qres ON qreq.QuoteID = qres.QuoteID
+                WHERE 
+                    qres.QuoteStatus IN ('Pending', 'Rejected')
+                GROUP BY 
+                    c.ClientID
+                HAVING 
+                    COUNT(qres.ResponseID) >= 3
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getAcceptedQuotesThisMonth() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    c.ClientID,
+                    c.first_name,
+                    c.last_name,
+                    qres.QuoteID,
+                    qres.Price,
+                    qres.StartTime,
+                    qres.EndTime
+                FROM 
+                    Client c
+                JOIN 
+                    QuoteRequest qreq ON c.ClientID = qreq.ClientID
+                JOIN 
+                    QuoteResponse qres ON qreq.QuoteID = qres.QuoteID
+                WHERE 
+                    qres.QuoteStatus = 'Accepted'
+                    AND MONTH(qres.AcceptedTime) = MONTH(CURRENT_DATE())
+                    AND YEAR(qres.AcceptedTime) = YEAR(CURRENT_DATE())
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getClientsWithoutRequests() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    c.ClientID, 
+                    c.first_name, 
+                    c.last_name, 
+                    c.email, 
+                    c.date_registered
+                FROM 
+                    Client c
+                LEFT JOIN 
+                    QuoteRequest qreq ON c.ClientID = qreq.ClientID
+                WHERE 
+                    qreq.QuoteID IS NULL
+                    AND c.username != 'davidsmith' -- Exclude David Smith by username
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getLargestDriveways() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                WITH MaxSquareFeet AS (
+                    SELECT MAX(qreq.SquareFeet) AS LargestSquareFeet
+                    FROM QuoteRequest qreq
+                    JOIN QuoteResponse qres ON qreq.QuoteID = qres.QuoteID
+                    JOIN \`Order\` o ON qres.QuoteID = o.QuoteID
+                    WHERE o.Status = 'Completed'
+                )
+                SELECT 
+                    qreq.PropertyAddress,
+                    qreq.SquareFeet
+                FROM 
+                    QuoteRequest qreq
+                JOIN 
+                    QuoteResponse qres ON qreq.QuoteID = qres.QuoteID
+                JOIN 
+                    \`Order\` o ON qres.QuoteID = o.QuoteID
+                JOIN 
+                    MaxSquareFeet msf ON qreq.SquareFeet = msf.LargestSquareFeet
+                WHERE 
+                    o.Status = 'Completed'
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getOverdueBills() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    b.BillID,
+                    b.OrderID,
+                    b.Price,
+                    b.GeneratedTime,
+                    c.ClientID,
+                    c.first_name,
+                    c.last_name,
+                    qreq.PropertyAddress
+                FROM 
+                    Bill b
+                JOIN 
+                    \`Order\` o ON b.OrderID = o.OrderID
+                JOIN 
+                    QuoteRequest qreq ON o.QuoteID = qreq.QuoteID
+                JOIN 
+                    Client c ON qreq.ClientID = c.ClientID
+                WHERE 
+                    b.BillStatus = 'Pending'
+                    AND b.GeneratedTime <= NOW() - INTERVAL 7 DAY
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getBadClients() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    c.ClientID,
+                    c.first_name,
+                    c.last_name,
+                    c.email
+                FROM 
+                    Client c
+                JOIN 
+                    QuoteRequest qreq ON c.ClientID = qreq.ClientID
+                JOIN 
+                    \`Order\` o ON qreq.QuoteID = o.QuoteID
+                JOIN 
+                    Bill b ON o.OrderID = b.OrderID
+                WHERE 
+                    c.ClientID NOT IN (
+                        SELECT DISTINCT c1.ClientID
+                        FROM Client c1
+                        JOIN QuoteRequest qreq1 ON c1.ClientID = qreq1.ClientID
+                        JOIN \`Order\` o1 ON qreq1.QuoteID = o1.QuoteID
+                        JOIN Bill b1 ON o1.OrderID = b1.OrderID
+                        WHERE b1.BillStatus = 'Paid' 
+                          AND (b1.PaidTime <= DATE_ADD(b1.GeneratedTime, INTERVAL 7 DAY))
+                    )
+                    AND b.BillStatus = 'Pending' 
+                    AND b.GeneratedTime <= NOW() - INTERVAL 7 DAY
+                GROUP BY 
+                    c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async getGoodClients() {
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    c.ClientID,
+                    c.first_name,
+                    c.last_name,
+                    c.email
+                FROM 
+                    Client c
+                JOIN 
+                    QuoteRequest qreq ON c.ClientID = qreq.ClientID
+                JOIN 
+                    \`Order\` o ON qreq.QuoteID = o.QuoteID
+                JOIN 
+                    Bill b ON o.OrderID = b.OrderID
+                WHERE 
+                    b.BillStatus = 'Paid' 
+                    AND TIMESTAMPDIFF(HOUR, b.GeneratedTime, b.PaidTime) <= 24
+                GROUP BY 
+                    c.ClientID
+            `;
+            connection.query(query, (err, results) => {
+                if (err) reject(new Error(err.message));
+                else resolve(results);
+            });
+        });
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 
 }
 

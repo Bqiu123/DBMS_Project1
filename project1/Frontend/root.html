@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Welcome to the Root Page</h1>
+            <button id="back-btn">Back to Dashboard</button>
+        </header>
+        <h2>All Requests</h2>
+            <table id="request-table">
+                <thead>
+                    <tr>
+                        <th>Quote ID</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Property Address</th>
+                        <th>Square Feet</th>
+                        <th>Proposed Price</th>
+                        <th>Note</th>
+                        <th>David Smith's Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+        <h2>All Quote Responses</h2>
+            <table id="quote-response-table">
+                <thead>
+                    <tr>
+                        <th>Response ID</th>
+                        <th>Quote ID</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Property Address</th>
+                        <th>Price</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Response Note</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+        <h2>All Orders</h2>
+            <table id="order-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Quote ID</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Property Address</th>
+                        <th>Status</th>
+                        <th>Work Start Time</th>
+                        <th>Work End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+        <h2>All Bills</h2>
+            <table id="bills-table">
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Order ID</th>
+                        <th>Quote ID</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Property Address</th>
+                        <th>Price</th>
+                        <th>Bill Status</th>
+                        <th>Generated Time</th>
+                        <th>Paid Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Big Clients</h2>
+            <table id="top-clients-table">
+                <thead>
+                    <tr>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Completed Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Difficult Clients</h2>
+            <table id="pending-rejected-clients-table">
+                <thead>
+                    <tr>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Affected Responses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Accepted Quotes This Month</h2>
+            <table id="accepted-quotes-this-month-table">
+                <thead>
+                    <tr>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Quote ID</th>
+                        <th>Price</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Prospective Clients</h2>
+            <table id="clients-without-requests-table">
+                <thead>
+                    <tr>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Date Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Largest Driveways</h2>
+            <table id="largest-driveways-table">
+                <thead>
+                    <tr>
+                        <th>Property Address</th>
+                        <th>Square Feet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Overdue Bills</h2>
+            <table id="overdue-bills-table">
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Order ID</th>
+                        <th>Price</th>
+                        <th>Generated Time</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Property Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded here -->
+                </tbody>
+            </table>
+
+        <h2>Bad Clients</h2>
+                <table id="bad-clients-table">
+                    <thead>
+                        <tr>
+                            <th>Client ID</th>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be dynamically loaded here -->
+                    </tbody>
+                </table>
+
+            <h2>Good Clients</h2>
+                <table id="good-clients-table">
+                    <thead>
+                        <tr>
+                            <th>Client ID</th>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be dynamically loaded here -->
+                    </tbody>
+                </table>
+
+
+        <script src="root.js"></script>
+    </main>
+</body>
+</html>
